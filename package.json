@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "harfbuzzjs": "^0.4.6",
-    "next": "15.1.6",
+    "next": "^15.1.12",
     "opentype.js": "^1.3.4",
-    "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
     "@types/node": "^22",
