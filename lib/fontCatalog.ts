@@ -222,6 +222,7 @@ export function fontFaceStyle(
   return {
     fontFamily: `"${def.family}", ${fallback}`,
     fontVariationSettings: settings,
+    fontWeight: axes.wght ? Math.round(axes.wght) : undefined,
     letterSpacing: `${(tracking || 0) / 1000}em`,
   };
 }
