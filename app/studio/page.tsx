@@ -201,8 +201,8 @@ function Studio() {
           </Link>
           <nav className="fq-nav" aria-label="Studio">
             <Link href="/">home</Link>
-            <span aria-hidden>|</span>
-            <span className="fq-nav-active">studio</span>
+            <span aria-hidden className="fq-nav-sep">|</span>
+            <Link href="/studio" className="is-active">studio</Link>
           </nav>
           <button type="button" className="fq-btn fq-btn--dark" onClick={download} disabled={exporting}>
             {exporting ? "Exporting…" : "Download .ttf"}

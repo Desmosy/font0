@@ -321,16 +321,18 @@ a {
   z-index: 0;
 }
 
-/* ---- Navbar: home | studio | community ---- */
+/* ---- Navbar: home | studio ---- */
 .mockup-nav {
   position: absolute;
-  top: 0;
+  top: 28px;
   left: 0;
   right: 0;
   z-index: 10;
   display: flex;
   justify-content: center;
-  padding: 22px 24px 0;
+  align-items: center;
+  height: 41px;
+  padding: 0 24px;
 }
 
 .mockup-nav-inner {
@@ -338,21 +340,14 @@ a {
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 0;
-  font-family: "Arial Nova", Arial, "Helvetica Neue", Helvetica, sans-serif;
-  font-size: 15px;
-  font-weight: 400;
-  letter-spacing: 0.01em;
+  gap: 12px;
+  font-family: var(--font-fq-body);
+  font-size: 14px;
+  font-weight: 500;
   color: var(--color-obsidian-hairline);
 }
 
-.mockup-nav-item {
-  display: inline-flex;
-  align-items: center;
-}
-
 .mockup-nav-sep {
-  margin: 0 14px;
   color: var(--color-obsidian-hairline);
   user-select: none;
 }
@@ -473,17 +468,16 @@ a {
   }
 
   .mockup-nav {
+    top: 0;
     padding-top: 16px;
+    height: auto;
   }
 }
 
 @media (max-width: 480px) {
   .mockup-nav-inner {
     font-size: 14px;
-  }
-
-  .mockup-nav-sep {
-    margin: 0 10px;
+    gap: 8px;
   }
 
   .mockup-search-input {
@@ -1321,6 +1315,7 @@ input[type="range"] {
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
+  height: 41px;
 }
 
 .fq-brand {
@@ -1349,13 +1344,15 @@ input[type="range"] {
   text-decoration: none;
 }
 
-.fq-nav a:hover {
-  text-decoration: underline;
-}
-
-.fq-nav-active {
+.fq-nav a:hover,
+.fq-nav a.is-active {
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+.fq-nav-sep {
+  color: inherit;
+  user-select: none;
 }
 
 .fq-btn {
@@ -1920,6 +1917,7 @@ input[type="range"] {
   .fq-hero-top {
     flex-direction: column;
     align-items: flex-start;
+    height: auto;
   }
 }
 

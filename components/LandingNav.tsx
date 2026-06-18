@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Fragment } from "react";
 
 const LINKS = [
   { href: "/", label: "home" },
   { href: "/studio", label: "studio" },
-  { href: "/studio", label: "community" },
 ] as const;
 
 export default function LandingNav() {
@@ -19,15 +19,16 @@ export default function LandingNav() {
           const active =
             label === "home" ? pathname === "/" : label === "studio" ? pathname.startsWith("/studio") : false;
           return (
-            <span key={label} className="mockup-nav-item">
+            <Fragment key={label}>
               {i > 0 && <span className="mockup-nav-sep" aria-hidden>|</span>}
               <Link href={href} className={active ? "is-active" : undefined}>
                 {label}
               </Link>
-            </span>
+            </Fragment>
           );
         })}
       </nav>
     </header>
   );
 }
+
