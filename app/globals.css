@@ -345,6 +345,24 @@ a {
   text-underline-offset: 3px;
 }
 
+.mockup-github-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mockup-github-stars {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 0 7px;
+  border: 1px solid rgba(20, 20, 20, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.34);
+  font-size: 11px;
+  line-height: 1;
+}
+
 .mockup-compose {
   position: absolute;
   z-index: 5;
@@ -3101,4 +3119,3 @@ input[type="range"] {
   0% { transform: translateX(-120%); }
   100% { transform: translateX(360%); }
 }
-
