@@ -1,22 +1,10 @@
-// Generative shaping: AI-driven geometric transforms applied to glyph outlines.
-//
-// This is the "the AI changes the curve points themselves" layer. Starting from
-// a real outline, it moves every node: affine reshape (slant / width / vertical
-// stretch) plus a deterministic, prompt-seeded organic distortion so different
-// briefs produce genuinely different geometry — while staying legible.
-
 import type { Cmd } from "./glyphOutline";
 
 export interface ShapeParams {
-  /** Shear in degrees (positive leans right). */
   slant: number;
-  /** Horizontal scale. */
   width: number;
-  /** Vertical scale (around the baseline). */
   vstretch: number;
-  /** Organic per-node displacement, 0 = none .. 1 = wild. */
   distortion: number;
-  /** Seed (derived from the prompt) so distortion is unique but stable. */
   seed: number;
 }
 
@@ -35,7 +23,6 @@ export function isIdentityShape(s: ShapeParams | undefined | null): boolean {
   );
 }
 
-/** Stable 32-bit hash of a string (for the prompt seed). */
 export function hashSeed(str: string): number {
   let h = 2166136261;
   for (let i = 0; i < str.length; i++) {
@@ -55,15 +42,11 @@ function mulberry32(a: number) {
   };
 }
 
-/** Apply shaping to one glyph's outline. Returns a new command array. */
 export function applyShaping(commands: Cmd[], upm: number, sp: ShapeParams, char: string): Cmd[] {
   const out = commands.map((c) => ({ ...c }));
   const tan = Math.tan((sp.slant * Math.PI) / 180);
   const mag = sp.distortion * upm * 0.06;
 
-  // 1) Organic distortion: displace each anchor (and its attached control
-  //    points + the next segment's leading control) by seeded noise, so
-  //    segments translate together rather than tear.
   if (mag > 0) {
     const rng = mulberry32((sp.seed ^ hashSeed(char) ^ 0x9e3779b9) >>> 0);
     for (let i = 0; i < out.length; i++) {
@@ -83,7 +66,6 @@ export function applyShaping(commands: Cmd[], upm: number, sp: ShapeParams, char
     }
   }
 
-  // 2) Affine reshape on every coordinate (anchors + control points).
   const tf = (x: number, y: number): [number, number] => {
     const ny = y * sp.vstretch;
     const nx = x * sp.width + ny * tan;
@@ -97,7 +79,6 @@ export function applyShaping(commands: Cmd[], upm: number, sp: ShapeParams, char
   return out;
 }
 
-/** Advance width scales with horizontal width so spacing stays consistent. */
 export function shapedAdvance(advance: number, sp: ShapeParams): number {
   return advance * sp.width;
 }

@@ -68,7 +68,6 @@ function Studio() {
       const data = await res.json();
       if (data?.params) {
         const sp = sanitizeParams(data.params);
-        // Seed the organic distortion from the prompt so it's unique yet stable.
         sp.shape = { ...sp.shape, seed: hashSeed(text) };
         setParams(sp);
         setEdits({});
@@ -102,7 +101,6 @@ function Studio() {
 
   const setBase = (id: string) => {
     const def = FONT_BY_ID[id] ?? FONT_BY_ID[DEFAULT_FONT_ID];
-    // Switching base changes the outlines, so per-glyph edits no longer apply.
     setEdits({});
     setParams((p) => sanitizeParams({ ...p, base: id, axes: { ...def.defaults } }));
   };
@@ -123,8 +121,6 @@ function Studio() {
       return next;
     });
 
-  // Render a live FontFace whenever the geometry is changed — by generative
-  // shaping or by per-glyph edits — so every surface shows the real result.
   const needsRebuild = Object.keys(edits).length > 0 || !isIdentityShape(params.shape);
   useEffect(() => {
     let cancelled = false;
@@ -162,8 +158,6 @@ function Studio() {
   const download = async () => {
     setExporting(true);
     try {
-      // Plain (no shaping/edits) → harfbuzz TrueType instance (keeps features).
-      // Shaped or edited → rebuilt CFF/OpenType (.otf) with geometry baked in.
       const rebuilt = needsRebuild;
       const bytes = rebuilt
         ? await (await import("@/lib/glyphOutline")).buildEditedFont(params, edits, params.shape)
@@ -183,8 +177,6 @@ function Studio() {
     }
   };
 
-  // When geometry is rebuilt (shaping/edits) we render from that static
-  // FontFace; otherwise the base @font-face + live variation settings.
   const liveStyle: React.CSSProperties = renderedFamily
     ? { fontFamily: `"${renderedFamily}", sans-serif`, letterSpacing: `${(params.tracking || 0) / 1000}em` }
     : fontFaceStyle(params.base, params.axes, params.tracking);

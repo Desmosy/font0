@@ -1,7 +1,37 @@
+# Dependencies
 /node_modules
+
+# Next.js
 /.next
 /out
-.env
-.env.local
-*.tsbuildinfo
+/build
 next-env.d.ts
+*.tsbuildinfo
+
+# Local environment. Keep real API keys out of git.
+.env
+.env.*
+!.env.example
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local/generated image experiments
+public/AQOn4FrWSzYk1AbWKnJhrT3np5u2rJz-LZa2Jf-vubXT5nzF4wb3Yx3HSaIZKueH68Ax0JcOZCW9s72j7BTz9ZMa.jpg
+public/color-ascii-art-of-a-computer-blended-with-modern- (1).jpeg
+public/computer-screen.png
+public/cool.jpeg
+public/final-footer.png
+public/image-940101915860513.jpg
+public/loner.jpeg
+public/new-art.jpeg
+public/orange.jpeg
+public/ren0.png
+
+# OS/editor files
+.DS_Store
+.idea
+.vscode

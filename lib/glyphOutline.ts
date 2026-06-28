@@ -1,17 +1,9 @@
-// Real-outline glyph extraction + edited-font assembly (client-side).
-//
-// Reading outlines from a harfbuzz-instanced font works perfectly with
-// opentype.js. Re-serializing those fonts does NOT (their GSUB tables break
-// opentype's writer), so to bake edits we assemble a FRESH font from the
-// extracted outlines — valid, if without the base's kerning/features.
-
 import opentype from "opentype.js";
 import { instanceFont } from "./instanceFont";
 import { UPPERCASE, LOWERCASE, DIGITS, SYMBOLS } from "./fontCatalog";
 import { applyShaping, shapedAdvance, isIdentityShape, type ShapeParams } from "./genShape";
 import type { FontParams } from "./types";
 
-/** Loose, mutable path command (opentype's is a discriminated union). */
 export interface Cmd {
   type: string;
   x?: number;
@@ -37,7 +29,6 @@ function sig(p: FontParams): string {
   return `${p.base}:${JSON.stringify(p.axes)}`;
 }
 
-/** Instance the current params to a static font and parse it (cached). */
 async function getInstance(params: FontParams): Promise<opentype.Font> {
   const k = sig(params);
   if (k === cacheKey && cacheFont) return cacheFont;
@@ -48,7 +39,6 @@ async function getInstance(params: FontParams): Promise<opentype.Font> {
   return font;
 }
 
-/** Extract one glyph's editable outline at the current axes (optionally shaped). */
 export async function getGlyphOutline(
   params: FontParams,
   char: string,
@@ -74,7 +64,6 @@ function glyphName(ch: string): string {
 
 export type GlyphEdits = Record<string, GlyphOutline>;
 
-/** Assemble a fresh, downloadable font from the instance + shaping + glyph edits. */
 export async function buildEditedFont(
   params: FontParams,
   edits: GlyphEdits,
@@ -95,8 +84,6 @@ export async function buildEditedFont(
     const src = font.charToGlyph(ch);
     const edit = edits[ch];
     const path = new opentype.Path();
-    // Edited glyphs are stored already-shaped (frozen). Non-edited glyphs get
-    // live shaping applied here so the whole face stays consistent.
     let cmds: Cmd[];
     let advance: number;
     if (edit) {

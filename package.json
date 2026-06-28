@@ -1,13 +1,16 @@
 {
   "name": "font-generator",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "description": "Prompt-driven variable font generator with browser-side font export.",
+  "license": "MIT",
   "scripts": {
     "dev": "next dev -p 3939",
     "dev:clean": "rm -rf .next && next dev -p 3939",
     "build": "next build",
     "start": "next start -p 3939",
-    "lint": "next lint"
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run build"
   },
   "dependencies": {
     "harfbuzzjs": "^0.4.6",

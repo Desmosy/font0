@@ -1,88 +1,77 @@
-# Glyph Atelier — generate a professional font from a prompt
+# Font Generator
 
-Describe a typeface in plain English and get a real, downloadable **TrueType
-font**. Instead of drawing letterforms from scratch, the AI picks the best
-matching **open-licensed variable font** from a curated library and dials its
-variable axes to fit your brief — so every glyph (lowercase, numerals, `&@#%`)
-is professionally drawn. Export instances a static `.ttf` at your chosen design.
+Font Generator is a prompt-driven type design studio. Describe the feeling of a
+typeface, edit the result in the browser, and export a real font file.
 
-## Pages
+The app does not generate raw glyphs from scratch. It starts from bundled
+open-licensed variable fonts, chooses a matching base, adjusts real OpenType
+axes, and optionally applies editable geometric shaping. This keeps exported
+fonts usable while still making each prompt feel distinct.
 
-- **`/` — landing.** Prompt entry over the atelier mockup. Submitting opens the
-  studio.
-- **`/studio` — workspace.** A character map, base-font picker, live variable
-  axis + tracking controls, type-scale / body / weight specimens, and download.
-  Reads `?prompt=` / `?preset=` from the landing.
+## Features
 
-## How it works
+- Prompt-to-font parameter generation through a server-side model route
+- No-key local fallback, so contributors can run the project immediately
+- Bundled open-licensed variable font catalog
+- Live axis controls for weight, optical size, width, slant, and font-specific axes
+- Character map and per-glyph node editing
+- Browser-side `.ttf` export with HarfBuzz instancing
+- `.otf` export when glyph geometry has been edited or shaped
 
-```
-prompt ──▶ /api/generate ──▶ NVIDIA Nemotron ──▶ { base, axes, tracking }
-                                  │ (keyword fallback if no key)
-                                  ▼
-{ base, axes } ──▶ @font-face + font-variation-settings ──▶ live preview
-               └─▶ harfbuzz (hb-subset.wasm) instancing ──▶ static .ttf download
-```
-
-- **`lib/fontCatalog.ts`** — the curated library of bundled variable fonts
-  (Inter, Space Grotesk, Recursive, Nunito, Fraunces, Playfair Display, Roboto
-  Slab, JetBrains Mono), each with its real `fvar` axis ranges, personality, and
-  keywords. The single source of truth for the AI, the UI, and export. Recursive
-  in particular (sans↔mono, linear↔casual, slant, cursive) gives the AI a wide
-  expressive range so different briefs land on visibly different letterforms.
-- **`app/api/generate/route.ts`** — turns a prompt into `{ base, axes, tracking }`
-  via Nemotron (OpenAI-compatible endpoint). Deterministic keyword fallback
-  scores the catalog when no key is set, so the app always works.
-- **Live rendering** — every surface (character map, preview, type scale, body)
-  renders the same real font via `@font-face` + `font-variation-settings`, so
-  what you see is exactly what you download.
-- **`lib/instanceFont.ts`** — on download, [harfbuzz](https://harfbuzz.github.io/)
-  (`hb-subset.wasm`) pins the chosen axes and emits a static `.ttf`, entirely in
-  the browser (no server, so it works on serverless hosting).
-
-## Editing model
-
-Two layers, both exportable:
-
-1. **Variable-axis design** — pick a base, then drag **Weight**, **Optical size**,
-   font-specific axes (Fraunces **Softness/Wonk**, Recursive **Mono/Casual/Slant/
-   Cursive**), and **Tracking**.
-2. **Per-glyph node editing** — select any glyph to open its real outline in the
-   canvas and **drag the nodes** to reshape it (`components/GlyphEditor.tsx`).
-   Edited glyphs are flagged and freeze at edit time; every surface updates live.
-
-With no edits, export instances a TrueType (`.ttf`) via harfbuzz (keeps
-kerning/features). With edits, export assembles a fresh OpenType (`.otf`) from the
-extracted outlines with your node edits baked in (`lib/glyphOutline.ts`).
-
-## Bundled fonts & licensing
-
-Fonts live in `public/fonts` and are all open-licensed (OFL / Apache 2.0) from
-[Google Fonts](https://github.com/google/fonts). Exported instances inherit the
-base font's license — keep the license notice when redistributing.
-
-## Run
+## Quick Start
 
 ```bash
 npm install
-cp .env.example .env.local   # add your NVIDIA key (or leave the placeholder)
-npm run dev                  # http://localhost:3939
+cp .env.example .env.local
+npm run dev
 ```
 
-Without a key the app runs on the keyword fallback. With a key, set:
+Open http://localhost:3939.
 
-```
+You do not need an API key for local development. With the placeholder key in
+`.env.example`, `/api/generate` uses the deterministic fallback.
+
+## Optional API Key
+
+Add a key only if you want to test model-backed generation:
+
+```env
 NVIDIA_API_KEY=nvapi-...
 NVIDIA_BASE_URL=https://integrate.api.nvidia.com/v1
 NVIDIA_MODEL=nvidia/nemotron-3-ultra-550b-a55b
 ```
 
-> ⚠️ Keep the key server-side only. If a key was ever shared in plaintext,
-> rotate it at https://build.nvidia.com.
+Provider keys must stay server-side. Do not expose them through `NEXT_PUBLIC_*`,
+client components, screenshots, issues, or commits.
 
-## Adding a font
+Optional route limits:
 
-Drop a variable `.ttf` in `public/fonts`, add a matching `@font-face` in
-`app/globals.css`, and append a `FontDef` (with its real `fvar` axis ranges) to
-`lib/fontCatalog.ts`. It immediately becomes selectable by the AI and the UI.
-# font0
+```env
+GENERATE_RATE_LIMIT=30
+GENERATE_RATE_WINDOW_MS=60000
+NVIDIA_TIMEOUT_MS=60000
+```
+
+## Project Docs
+
+- [ARCHITECTURE.md](./ARCHITECTURE.md) - what the project does, how it works, and how the code is organized
+- [CONTRIBUTING.md](./CONTRIBUTING.md) - local setup, pull request expectations, and font contribution rules
+- [SECURITY.md](./SECURITY.md) - API key handling and vulnerability reporting
+- [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) - bundled font and WebAssembly notices
+
+## Scripts
+
+```bash
+npm run dev
+npm run typecheck
+npm run build
+npm run check
+```
+
+`npm run check` is the command CI runs.
+
+## License
+
+Application code is licensed under MIT. Bundled fonts and WebAssembly assets keep
+their original upstream licenses. Exported font instances inherit the license of
+the selected base font.

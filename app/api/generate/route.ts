@@ -4,8 +4,21 @@ import { FONTS, FONT_BY_ID, DEFAULT_FONT_ID } from "@/lib/fontCatalog";
 
 export const runtime = "nodejs";
 
-// Describe the bundled fonts + their real axis ranges so the model picks a base
-// and dials axes that actually exist on that font.
+const MAX_PROMPT_CHARS = 600;
+const MAX_BODY_BYTES = 2048;
+const DEFAULT_BASE_URL = "https://integrate.api.nvidia.com/v1";
+const DEFAULT_MODEL = "nvidia/nemotron-3-ultra-550b-a55b";
+const DEFAULT_TIMEOUT_MS = 60000;
+const DEFAULT_RATE_LIMIT = 30;
+const DEFAULT_RATE_WINDOW_MS = 60_000;
+
+type RateBucket = {
+  count: number;
+  resetAt: number;
+};
+
+const rateBuckets = new Map<string, RateBucket>();
+
 const CATALOG = FONTS.map((f) => {
   const axes = f.axes
     .map((a) => `${a.tag} ${a.min}-${a.max} (${a.label.toLowerCase()})`)
@@ -20,19 +33,24 @@ ${CATALOG}
 
 Respond with ONLY a JSON object (no prose, no markdown fences) of exactly this shape:
 {
-  "familyName": string,   // short original display name fitting the brief
-  "base": string,         // one of the font ids above
-  "axes": { ... },        // axis values, keys EXACTLY as listed for the chosen base; stay within each range
-  "tracking": number,     // letter spacing in 1/1000 em, -40 tight .. 160 airy, 0 default
-  "shape": {              // GENERATIVE geometry — reshapes the actual curve points
-    "slant": number,      // shear degrees -20..20 (positive leans right; use for italic/dynamic/energetic)
-    "width": number,      // horizontal scale 0.7 condensed .. 1.4 extended, 1 = normal
-    "vstretch": number,   // vertical scale 0.82 short .. 1.18 tall, 1 = normal
-    "distortion": number  // organic wobble 0 clean .. 1 wild (raise for funky/comic/stupid/grunge/hand-drawn/messy/weird)
+  "familyName": string,
+  "base": string,
+  "axes": { ... },
+  "tracking": number,
+  "shape": {
+    "slant": number,
+    "width": number,
+    "vstretch": number,
+    "distortion": number
   }
 }
 
 Guidance:
+- familyName: short original display name fitting the brief.
+- base: one of the font ids above.
+- axes: keys exactly as listed for the chosen base, values within range.
+- tracking: letter spacing in 1/1000 em, -40 tight .. 160 airy, 0 default.
+- shape: slant -20..20, width 0.7..1.4, vstretch 0.82..1.18, distortion 0..1.
 - Match personality first: professional/UI/Helvetica/Open Sans -> inter; geometric/futurist/startup -> spacegrotesk; rounded/friendly/playful/kids -> nunito; editorial/magazine/characterful serif -> fraunces; elegant/fashion/luxury/high-contrast -> playfairdisplay; slab/industrial/sturdy -> robotoslab; code/mono/technical/terminal -> jetbrainsmono; quirky/expressive/distinctive/casual/handwritten/"unique" -> recursive.
 - IMPORTANT — make every brief feel distinct: use the FULL set of axes the base offers, not just weight. Two different briefs on the same base should land on visibly different axis values. Push axes toward the extremes the brief implies rather than safe middles.
 - Weight: light ~330, regular ~430, medium ~540, semibold ~620, bold ~720, black ~860 (clamp to the base's wght range). Reflect intensity words (loud/strong/bold/heavy -> heavier; delicate/elegant/quiet -> lighter).
@@ -52,12 +70,56 @@ function extractJson(text: string): unknown {
   return JSON.parse(body.slice(start, end + 1));
 }
 
-/** Deterministic keyword fallback when the model is unavailable. */
+function envInt(name: string, fallback: number, min: number, max: number) {
+  const raw = process.env[name];
+  if (!raw) return fallback;
+  const value = Number(raw);
+  if (!Number.isFinite(value)) return fallback;
+  return Math.min(max, Math.max(min, Math.round(value)));
+}
+
+function normalizeBaseUrl(value: string) {
+  const url = new URL(value);
+  if (url.protocol !== "https:" && url.protocol !== "http:") {
+    throw new Error("unsupported upstream protocol");
+  }
+  return url.toString().replace(/\/$/, "");
+}
+
+function clientId(req: Request) {
+  const forwarded = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  return forwarded || req.headers.get("x-real-ip") || "local";
+}
+
+function rateLimit(req: Request) {
+  const limit = envInt("GENERATE_RATE_LIMIT", DEFAULT_RATE_LIMIT, 1, 300);
+  const windowMs = envInt("GENERATE_RATE_WINDOW_MS", DEFAULT_RATE_WINDOW_MS, 1000, 3_600_000);
+  const now = Date.now();
+  const id = clientId(req);
+
+  if (rateBuckets.size > 1000) {
+    for (const [key, bucket] of rateBuckets) {
+      if (bucket.resetAt <= now) rateBuckets.delete(key);
+    }
+  }
+
+  const current = rateBuckets.get(id);
+
+  if (!current || current.resetAt <= now) {
+    rateBuckets.set(id, { count: 1, resetAt: now + windowMs });
+    return null;
+  }
+
+  current.count += 1;
+  if (current.count <= limit) return null;
+
+  return Math.max(1, Math.ceil((current.resetAt - now) / 1000));
+}
+
 function heuristicParams(prompt: string): FontParams {
   const p = prompt.toLowerCase();
   const has = (...w: string[]) => w.some((x) => p.includes(x));
 
-  // Score each font by keyword hits; pick the best, else default.
   let bestId = DEFAULT_FONT_ID;
   let bestScore = 0;
   for (const f of FONTS) {
@@ -70,7 +132,6 @@ function heuristicParams(prompt: string): FontParams {
   const def = FONT_BY_ID[bestId];
   const axes: Record<string, number> = { ...def.defaults };
 
-  // Weight
   const wghtAxis = def.axes.find((a) => a.tag === "wght");
   if (wghtAxis) {
     let w = axes.wght ?? 430;
@@ -80,7 +141,6 @@ function heuristicParams(prompt: string): FontParams {
     else if (has("medium", "semibold")) w = 560;
     axes.wght = Math.min(wghtAxis.max, Math.max(wghtAxis.min, w));
   }
-  // Contrast / display via optical size where available
   const opszAxis = def.axes.find((a) => a.tag === "opsz");
   if (opszAxis) {
     if (has("elegant", "high contrast", "high-contrast", "fashion", "luxury", "display", "didone", "headline")) {
@@ -89,16 +149,12 @@ function heuristicParams(prompt: string): FontParams {
       axes.opsz = opszAxis.min;
     }
   }
-  // Softness for fraunces
   if (def.axes.some((a) => a.tag === "SOFT") && has("soft", "round", "warm", "friendly")) axes.SOFT = 60;
-  // Recursive expressive axes
   if (def.axes.some((a) => a.tag === "MONO") && has("mono", "code", "techy", "technical", "precise")) axes.MONO = 1;
   if (def.axes.some((a) => a.tag === "CASL") && has("casual", "warm", "friendly", "handmade", "playful", "fun")) axes.CASL = 1;
-  // Slant / italic (recursive has a real slnt axis)
   if (def.axes.some((a) => a.tag === "slnt") && has("italic", "slanted", "oblique", "dynamic", "energetic")) axes.slnt = -10;
   if (def.axes.some((a) => a.tag === "CRSV") && has("script", "cursive", "handwritten", "signature")) axes.CRSV = 1;
 
-  // Generative shaping — the per-prompt geometry change.
   const shape = { slant: 0, width: 1, vstretch: 1, distortion: 0, seed: 0 };
   if (has("funky", "quirky", "playful", "weird", "wonky")) shape.distortion = 0.42;
   if (has("comic", "cartoon", "childish", "kids", "fun")) { shape.distortion = Math.max(shape.distortion, 0.3); shape.vstretch = 1.08; shape.width = 1.1; }
@@ -115,7 +171,6 @@ function heuristicParams(prompt: string): FontParams {
   if (has("tight", "compact", "condensed")) tracking = -25;
   else if (has("airy", "spacious", "open", "wide", "luxurious")) tracking = 90;
 
-  // Family name
   let familyName = "";
   const m = prompt.match(/(?:called|named|name[:d]?)\s+["']?([A-Za-z][\w -]{1,28})/i);
   if (m) familyName = m[1].trim();
@@ -126,22 +181,48 @@ function heuristicParams(prompt: string): FontParams {
 }
 
 export async function POST(req: Request) {
+  const contentLength = Number(req.headers.get("content-length") ?? "0");
+  if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
+    return NextResponse.json({ error: "request too large" }, { status: 413 });
+  }
+
+  const retryAfter = rateLimit(req);
+  if (retryAfter) {
+    return NextResponse.json(
+      { error: "rate limit exceeded" },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } },
+    );
+  }
+
   let prompt = "";
   try {
-    const body = await req.json();
-    prompt = typeof body?.prompt === "string" ? body.prompt.slice(0, 600) : "";
+    const rawBody = await req.text();
+    if (new TextEncoder().encode(rawBody).byteLength > MAX_BODY_BYTES) {
+      return NextResponse.json({ error: "request too large" }, { status: 413 });
+    }
+    const body = JSON.parse(rawBody);
+    prompt = typeof body?.prompt === "string" ? body.prompt.trim().slice(0, MAX_PROMPT_CHARS) : "";
   } catch {
     return NextResponse.json({ error: "invalid body" }, { status: 400 });
   }
-  if (!prompt.trim()) return NextResponse.json({ error: "empty prompt" }, { status: 400 });
+  if (!prompt) return NextResponse.json({ error: "empty prompt" }, { status: 400 });
 
   const key = process.env.NVIDIA_API_KEY;
-  const baseUrl = process.env.NVIDIA_BASE_URL || "https://integrate.api.nvidia.com/v1";
-  const model = process.env.NVIDIA_MODEL || "nvidia/nemotron-3-ultra-550b-a55b";
+  const model = process.env.NVIDIA_MODEL || DEFAULT_MODEL;
 
   if (!key || key.includes("xxxx")) {
     return NextResponse.json({ params: heuristicParams(prompt), source: "heuristic" });
   }
+
+  let baseUrl = DEFAULT_BASE_URL;
+  try {
+    baseUrl = normalizeBaseUrl(process.env.NVIDIA_BASE_URL || DEFAULT_BASE_URL);
+  } catch {
+    console.error("Invalid NVIDIA_BASE_URL");
+    return NextResponse.json({ params: heuristicParams(prompt), source: "heuristic-fallback" }, { status: 200 });
+  }
+
+  const timeoutMs = envInt("NVIDIA_TIMEOUT_MS", DEFAULT_TIMEOUT_MS, 5000, 120000);
 
   const requestBody = JSON.stringify({
     model,
@@ -149,7 +230,6 @@ export async function POST(req: Request) {
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: prompt },
     ],
-    // Precise brief->font mapping, not a creative task — keep it stable.
     temperature: 0.4,
     top_p: 0.9,
     max_tokens: 800,
@@ -157,8 +237,6 @@ export async function POST(req: Request) {
   });
 
   try {
-    // NVIDIA's NIM endpoint occasionally returns transient 5xx under load.
-    // Retry with backoff so a blip doesn't silently drop us to the heuristic.
     let resp: Response | null = null;
     let lastStatus = 0;
     for (let attempt = 0; attempt < 3; attempt++) {
@@ -166,7 +244,7 @@ export async function POST(req: Request) {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
         body: requestBody,
-        signal: AbortSignal.timeout(60000),
+        signal: AbortSignal.timeout(timeoutMs),
       });
       if (resp.ok) break;
       lastStatus = resp.status;
@@ -190,10 +268,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ params, source: "nemotron" });
   } catch (err) {
     console.error("generate failed", err);
-    const msg = err instanceof Error ? err.message : "unknown";
-    return NextResponse.json(
-      { params: heuristicParams(prompt), source: "heuristic-fallback", error: msg },
-      { status: 200 },
-    );
+    return NextResponse.json({ params: heuristicParams(prompt), source: "heuristic-fallback" }, { status: 200 });
   }
 }

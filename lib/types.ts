@@ -1,22 +1,11 @@
-// Shared font-parameter contract between the AI route and the UI.
-//
-// A generated font = a bundled variable base typeface (`base`) instanced at a
-// set of variable-axis values (`axes`) plus letter tracking. Real, professional
-// outlines come from the base font; the AI only chooses base + axes + tracking.
-
 import { DEFAULT_FONT_ID, FONT_BY_ID } from "./fontCatalog";
 import { IDENTITY_SHAPE, type ShapeParams } from "./genShape";
 
 export interface FontParams {
-  /** Display name the user gives the typeface (cosmetic). */
   familyName: string;
-  /** Which bundled base font to instance (a FontDef id). */
   base: string;
-  /** Variable-axis values, e.g. { wght: 540, opsz: 18 }. */
   axes: Record<string, number>;
-  /** Letter tracking in 1/1000 em (letter-spacing). */
   tracking: number;
-  /** Generative geometry transforms (the AI redraws the curves). */
   shape: ShapeParams;
 }
 
@@ -34,7 +23,6 @@ const N = (v: unknown, lo: number, hi: number, fallback: number) => {
   return Math.min(hi, Math.max(lo, n));
 };
 
-/** Coerce arbitrary (AI) input into a safe, in-range FontParams. */
 export function sanitizeParams(input: Partial<FontParams> | null | undefined): FontParams {
   const p = input ?? {};
 
@@ -42,7 +30,6 @@ export function sanitizeParams(input: Partial<FontParams> | null | undefined): F
     typeof p.base === "string" && FONT_BY_ID[p.base] ? p.base : DEFAULT_FONT_ID;
   const def = FONT_BY_ID[base];
 
-  // Start from the font's sensible defaults, then apply any in-range overrides.
   const axes: Record<string, number> = { ...def.defaults };
   const incoming = p.axes && typeof p.axes === "object" ? (p.axes as Record<string, unknown>) : {};
   for (const axis of def.axes) {

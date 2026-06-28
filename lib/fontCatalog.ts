@@ -1,34 +1,26 @@
-// Catalog of bundled open-licensed (OFL/Apache) variable fonts.
-//
-// Every font here is a real, professionally-drawn variable typeface shipped in
-// public/fonts. A generated "font" is one of these bases instanced at a set of
-// variable-axis values (+ tracking). Axis ranges below are the fonts' true
-// fvar min/max, so any value we pin is always valid for harfbuzz instancing.
-
 import type { CSSProperties } from "react";
 
 export interface AxisDef {
-  tag: string; // OpenType axis tag, e.g. "wght"
+  tag: string;
   label: string;
   min: number;
   max: number;
   step: number;
-  /** Short hint about what the axis does, shown under the slider. */
   hint?: string;
   fmt?: (v: number) => string;
 }
 
 export interface FontDef {
-  id: string; // stable id used by the AI + URLs, e.g. "inter"
-  label: string; // display name, e.g. "Inter"
-  family: string; // CSS @font-face family, e.g. "BS Inter"
-  file: string; // served path, e.g. "/fonts/Inter.ttf"
-  upm: number; // units per em (for reference)
-  category: string; // personality, e.g. "Humanist sans"
-  blurb: string; // one-line description for the picker + AI
+  id: string;
+  label: string;
+  family: string;
+  file: string;
+  upm: number;
+  category: string;
+  blurb: string;
   axes: AxisDef[];
-  defaults: Record<string, number>; // sensible starting axis values
-  keywords: string[]; // for the deterministic heuristic fallback
+  defaults: Record<string, number>;
+  keywords: string[];
 }
 
 const WGHT = (min: number, max: number): AxisDef => ({
@@ -183,20 +175,17 @@ export const FONT_BY_ID: Record<string, FontDef> = Object.fromEntries(
 
 export const DEFAULT_FONT_ID = "inter";
 
-/** Characters shown in the studio character map (all present in every base). */
 export const UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 export const LOWERCASE = "abcdefghijklmnopqrstuvwxyz".split("");
 export const DIGITS = "0123456789".split("");
 export const SYMBOLS = "&@#%$.,:;!?‘’“”()[]{}/-–—*+=".split("");
 
-/** Clamp an axis value to a font's declared range. */
 export function clampAxis(def: FontDef, tag: string, value: number): number {
   const axis = def.axes.find((a) => a.tag === tag);
   if (!axis) return value;
   return Math.min(axis.max, Math.max(axis.min, value));
 }
 
-/** Friendly weight name from a wght axis value (100–900 scale). */
 export function weightName(wght: number): string {
   if (wght < 250) return "Thin";
   if (wght < 350) return "Light";
@@ -208,7 +197,6 @@ export function weightName(wght: number): string {
   return "Black";
 }
 
-/** Build the CSS needed to render text in a font at given axis values. */
 export function fontFaceStyle(
   fontId: string,
   axes: Record<string, number>,

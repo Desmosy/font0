@@ -17,7 +17,6 @@ interface Props {
   source: string | null;
 }
 
-// Named weight rungs mapped onto whatever range the chosen base supports.
 const RUNGS: { name: string; t: number }[] = [
   { name: "Thin", t: 0 },
   { name: "Light", t: 0.22 },
@@ -41,7 +40,6 @@ export default function FontSpecimen({ params, liveStyle, glyphCount, source }: 
 
   return (
     <div className="gf-specimen">
-      {/* ---- Hero preview ---- */}
       <section className="gf-playground fq-card fq-card--white fq-bento-preview">
         <div className="gf-preview-toolbar">
           <div className="gf-preview-select">
@@ -85,7 +83,6 @@ export default function FontSpecimen({ params, liveStyle, glyphCount, source }: 
         />
       </section>
 
-      {/* ---- Type scale ---- */}
       <section className="gf-type-scale fq-card fq-card--yellow fq-bento-scale">
         <h2 className="gf-section-title">Type scale</h2>
         <div className="gf-scale-list">
@@ -106,7 +103,6 @@ export default function FontSpecimen({ params, liveStyle, glyphCount, source }: 
         </div>
       </section>
 
-      {/* ---- Paragraph specimens ---- */}
       <section className="gf-paragraphs fq-card fq-card--pink fq-span-full">
         <h2 className="gf-section-title">Body text</h2>
         {PARAGRAPH_SPECIMENS.map((block) => (
@@ -122,7 +118,6 @@ export default function FontSpecimen({ params, liveStyle, glyphCount, source }: 
         ))}
       </section>
 
-      {/* ---- Weight ladder ---- */}
       <section className="gf-styles fq-card fq-card--lavender fq-span-full">
         <div className="gf-styles-head">
           <h2 className="gf-section-title">Weights</h2>
@@ -151,7 +146,6 @@ export default function FontSpecimen({ params, liveStyle, glyphCount, source }: 
         </div>
       </section>
 
-      {/* ---- About ---- */}
       <div className="gf-bottom-grid">
         <section className="gf-recap fq-card fq-card--terra">
           <h2 className="gf-section-title">Glyph set</h2>

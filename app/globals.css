@@ -1,5 +1,3 @@
-/* Bundled OFL/Apache variable fonts used as generation bases.
-   Full axis ranges declared so font-variation-settings can drive them live. */
 @font-face {
   font-family: "BS Inter";
   src: url("/fonts/Inter.ttf") format("truetype");
@@ -50,7 +48,6 @@
 }
 
 :root {
-  /* Colors */
   --color-indigo-frame: #160572;
   --color-cream-paper: #f2ebe6;
   --color-pure-white: #ffffff;
@@ -71,7 +68,6 @@
   --color-daffodil: #f9e44d;
   --color-highlighter-yellow: #ffff00;
 
-  /* Typography — Scale */
   --text-caption: 12px;
   --leading-caption: 1.2;
   --text-body-sm: 14px;
@@ -91,7 +87,6 @@
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
 
-  /* Spacing */
   --spacing-10: 10px;
   --spacing-12: 12px;
   --spacing-15: 15px;
@@ -109,18 +104,15 @@
   --spacing-86: 86px;
   --spacing-215: 215px;
 
-  /* Layout */
   --page-max-width: 1200px;
   --section-gap: 72px;
   --card-padding: 22px;
   --element-gap: 20px;
 
-  /* Border Radius */
   --radius-cards: 10px;
   --radius-buttons: 30px;
   --radius-projectcards: 0px;
 
-  /* Surfaces */
   --surface-cream-paper: #f2ebe6;
   --surface-pure-white: #ffffff;
   --surface-indigo-band: #160572;
@@ -153,7 +145,6 @@ a {
   text-decoration: none;
 }
 
-/* ---- Typography utilities ---- */
 .display-serif {
   font-family: var(--font-millik);
   font-weight: var(--font-weight-regular);
@@ -163,7 +154,6 @@ a {
   font-family: var(--font-klarheit-grotesk);
 }
 
-/* ---- Fixed chrome ---- */
 .site-chrome {
   position: fixed;
   inset: 0 0 auto;
@@ -221,7 +211,6 @@ a {
   background: var(--color-acid-green);
 }
 
-/* ---- Pill buttons ---- */
 .pill {
   font-family: var(--font-klarheit-grotesk);
   font-size: var(--text-body-sm);
@@ -264,7 +253,6 @@ a {
   border: 1.5px solid var(--color-obsidian-hairline);
 }
 
-/* ---- Outlined link ---- */
 .link-accent {
   font-family: var(--font-klarheit-grotesk);
   font-size: var(--text-body);
@@ -285,7 +273,6 @@ a {
   border-bottom-color: var(--color-daffodil);
 }
 
-/* ---- Highlighter badge ---- */
 .badge {
   display: inline-block;
   background: var(--color-highlighter-yellow);
@@ -297,14 +284,9 @@ a {
   line-height: 1.2;
 }
 
-/* ---- Hairline frame ---- */
 .hairline-frame {
   border: 1.5px solid var(--color-obsidian-hairline);
 }
-
-/* =============================================================================
-   Landing — mockup layout (bg + folder + cream search)
-   ============================================================================= */
 
 .mockup-landing {
   position: relative;
@@ -321,7 +303,6 @@ a {
   z-index: 0;
 }
 
-/* ---- Navbar: home | studio ---- */
 .mockup-nav {
   position: absolute;
   top: 28px;
@@ -364,7 +345,6 @@ a {
   text-underline-offset: 3px;
 }
 
-/* ---- Composition: folder + prompt locked together ---- */
 .mockup-compose {
   position: absolute;
   z-index: 5;
@@ -388,7 +368,6 @@ a {
   display: block;
 }
 
-/* Prompt anchored to folder art (right side, lower third) */
 .mockup-prompt-col {
   position: absolute;
   left: 58%;
@@ -492,7 +471,6 @@ a {
   }
 }
 
-/* ---- Legacy landing (unused) ---- */
 .hero-bleed {
   position: relative;
   width: 100%;
@@ -578,7 +556,6 @@ a {
   }
 }
 
-/* ---- Prompt strip (below hero) ---- */
 .prompt-strip {
   background: var(--color-cream-paper);
   border-bottom: 1.5px solid var(--color-obsidian-hairline);
@@ -590,7 +567,6 @@ a {
   margin: 0 auto;
 }
 
-/* ---- Prompt panel ---- */
 .prompt-panel {
   background: var(--color-pure-white);
   border: 1.5px solid var(--color-obsidian-hairline);
@@ -679,7 +655,6 @@ a {
   background: transparent;
 }
 
-/* ---- Section layout ---- */
 .section {
   max-width: var(--page-max-width);
   margin: 0 auto;
@@ -704,7 +679,6 @@ a {
   margin: 0 0 var(--spacing-40);
 }
 
-/* ---- Artist portfolio grid ---- */
 .grid4 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -755,7 +729,6 @@ a {
   margin-top: 4px;
 }
 
-/* ---- Featured project cards ---- */
 .project-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -831,7 +804,6 @@ a {
   align-self: flex-start;
 }
 
-/* ---- Announcement banner ---- */
 .announcement {
   background: var(--color-pure-white);
   border-top: 1.5px solid var(--color-obsidian-hairline);
@@ -883,7 +855,6 @@ a {
   padding-bottom: 4px;
 }
 
-/* ---- Indigo footer band ---- */
 .footer-band {
   background: var(--color-indigo-frame);
   min-height: 120px;
@@ -917,7 +888,6 @@ a {
   color: var(--color-pure-white);
 }
 
-/* ---- Studio page ---- */
 .studio-nav {
   max-width: var(--page-max-width);
   margin: 0 auto;
@@ -1060,7 +1030,6 @@ input[type="range"] {
   font-family: var(--font-klarheit-grotesk);
 }
 
-/* ---- Editor ---- */
 .editor-shell {
   border: 1.5px solid var(--color-obsidian-hairline);
   background: var(--color-pure-white);
@@ -1128,7 +1097,6 @@ input[type="range"] {
   line-height: 1.5;
 }
 
-/* ---- Glyph grid ---- */
 .glyph-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
@@ -1172,7 +1140,6 @@ input[type="range"] {
   color: var(--color-slate-ink);
 }
 
-/* ---- Toolbar / preview ---- */
 .toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -1239,7 +1206,6 @@ input[type="range"] {
   }
 }
 
-/* ---- Editorial intro strip ---- */
 .intro-strip {
   background: var(--color-cream-paper);
   padding: var(--spacing-80) var(--spacing-40) var(--spacing-60);
@@ -1257,10 +1223,6 @@ input[type="range"] {
 .intro-strip .badge {
   margin-bottom: var(--spacing-20);
 }
-
-/* =============================================================================
-   Studio — Fauget-inspired bento workspace
-   ============================================================================= */
 
 .fq-studio {
   --fq-lavender: #bdbbe7;
@@ -1298,7 +1260,6 @@ input[type="range"] {
   letter-spacing: -0.03em;
 }
 
-/* ---- Hero ---- */
 .fq-hero {
   background: var(--fq-lavender);
   padding: 28px var(--fq-page-pad) 40px;
@@ -1471,7 +1432,6 @@ input[type="range"] {
   color: var(--fq-muted);
 }
 
-/* ---- Bento grid ---- */
 .fq-main {
   width: 100%;
   max-width: none;
@@ -1486,7 +1446,6 @@ input[type="range"] {
   grid-column: 1 / -1;
 }
 
-/* ---- Workspace: character map + parameters side by side ---- */
 .fq-workspace-row {
   grid-column: 1 / -1;
   display: grid;
@@ -1589,7 +1548,6 @@ input[type="range"] {
   }
 }
 
-/* ---- Design panel ---- */
 .fq-studio .pp-design-panel {
   display: block;
 }
@@ -1723,7 +1681,6 @@ input[type="range"] {
   }
 }
 
-/* ---- Specimen sections ---- */
 .fq-studio .gf-section-title {
   font-size: clamp(22px, 3vw, 28px);
   margin: 0 0 20px;
@@ -1798,7 +1755,6 @@ input[type="range"] {
   border-bottom-color: rgba(255, 255, 255, 0.5);
 }
 
-/* ---- Glyphs ---- */
 .fq-studio .pp-glyph-inspector {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
@@ -1921,9 +1877,6 @@ input[type="range"] {
   }
 }
 
-/* ---- Legacy studio (unused when .fq-studio present) ---- */
-
-/* ---- Floating nav ---- */
 .pp-nav {
   position: sticky;
   top: 20px;
@@ -2010,7 +1963,6 @@ input[type="range"] {
   opacity: 0.92;
 }
 
-/* ---- Main layout ---- */
 .pp-main {
   max-width: 1280px;
   margin: 0 auto;
@@ -2020,7 +1972,6 @@ input[type="range"] {
   gap: 32px;
 }
 
-/* ---- Hero ---- */
 .pp-hero {
   padding: 24px 8px 8px;
 }
@@ -2069,7 +2020,6 @@ input[type="range"] {
   background: var(--color-highlighter-yellow);
 }
 
-/* ---- Specimen tester (Pangram-style) ---- */
 .pp-specimen {
   background: #eceae7;
   border-radius: 20px;
@@ -2159,7 +2109,6 @@ input[type="range"] {
   font-family: Fraunces, var(--font-millik), Georgia, serif;
 }
 
-/* ---- Section blocks ---- */
 .pp-section {
   background: var(--color-pure-white);
   border-radius: 20px;
@@ -2184,7 +2133,6 @@ input[type="range"] {
   margin: 0;
 }
 
-/* ---- Glyph inspector ---- */
 .pp-glyph-inspector {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
@@ -2340,7 +2288,6 @@ input[type="range"] {
   font-size: var(--text-body-sm);
 }
 
-/* ---- Design panel ---- */
 .pp-design-panel {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -2422,7 +2369,6 @@ input[type="range"] {
   border-color: var(--color-obsidian-hairline);
 }
 
-/* ---- Editor inside studio ---- */
 .studio-page .editor-shell {
   border: none;
   border-radius: 16px;
@@ -2523,10 +2469,6 @@ input[type="range"] {
     min-width: 100%;
   }
 }
-
-/* =============================================================================
-   Google Fonts–style specimen sections
-   ============================================================================= */
 
 .gf-specimen {
   display: flex;
@@ -2912,7 +2854,6 @@ input[type="range"] {
   border-bottom: 1px solid var(--color-electric-teal);
 }
 
-/* ===== Real-font studio: base picker, character map, glyph stage ===== */
 .fq-studio .pp-font-picker {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3037,7 +2978,6 @@ input[type="range"] {
   opacity: 0.6;
 }
 
-/* ===== Live glyph editor ===== */
 .fq-studio .pp-glyph-stage-wrap {
   flex: 1;
   display: flex;
@@ -3100,7 +3040,6 @@ input[type="range"] {
   margin-left: 6px;
 }
 
-/* ===== Improved generate loading ===== */
 .fq-hero-prompt-btn--loading {
   pointer-events: none;
 }

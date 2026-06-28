@@ -86,7 +86,6 @@ export default function GlyphInspector({
   const shapeSig = JSON.stringify(shape);
 
   useEffect(() => {
-    // Edited glyphs are frozen at edit time — show the saved outline.
     if (edits[selected]) {
       setOutline(edits[selected]);
       return;

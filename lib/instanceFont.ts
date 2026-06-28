@@ -1,9 +1,3 @@
-// Client-side variable-font instancing via harfbuzz (hb-subset.wasm).
-//
-// Given a base font id + axis values, pins those axes and emits a static .ttf
-// with the chosen design baked in. Runs entirely in the browser (no server, so
-// it works on serverless hosting). The wasm + base fonts are served from public/.
-
 import { FONT_BY_ID, DEFAULT_FONT_ID } from "./fontCatalog";
 import type { FontParams } from "./types";
 
@@ -54,20 +48,17 @@ function HB_TAG(s: string): number {
   );
 }
 
-/** Instance the chosen base font at the given axes into a static .ttf. */
 export async function instanceFont(params: FontParams): Promise<Uint8Array<ArrayBuffer>> {
   const def = FONT_BY_ID[params.base] ?? FONT_BY_ID[DEFAULT_FONT_ID];
   const e = await getExports();
   const fontBytes = new Uint8Array(await getFontBytes(def.file));
 
-  // The wasm heap can grow (and detach the old buffer) on malloc, so always
-  // read a fresh Uint8Array view of e.memory.buffer when touching memory.
   const heap = () => new Uint8Array(e.memory.buffer);
 
   const fontPtr = e.malloc(fontBytes.length);
   heap().set(fontBytes, fontPtr);
 
-  const blob = e.hb_blob_create(fontPtr, fontBytes.length, 2 /* writable */, 0, 0);
+  const blob = e.hb_blob_create(fontPtr, fontBytes.length, 2, 0, 0);
   const face = e.hb_face_create(blob, 0);
   const input = e.hb_subset_input_create_or_fail();
   e.hb_subset_input_keep_everything(input);
@@ -91,7 +82,6 @@ export async function instanceFont(params: FontParams): Promise<Uint8Array<Array
   const outBlob = e.hb_face_reference_blob(result);
   const len = e.hb_blob_get_length(outBlob);
   const dataPtr = e.hb_blob_get_data(outBlob, 0);
-  // Copy out of wasm memory into a fresh, standalone ArrayBuffer.
   const out = new Uint8Array(len);
   out.set(heap().subarray(dataPtr, dataPtr + len));
 

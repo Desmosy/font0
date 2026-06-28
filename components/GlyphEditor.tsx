@@ -9,7 +9,7 @@ interface Props {
 }
 
 interface Anchor {
-  index: number; // command index whose endpoint this is
+  index: number;
   x: number;
   y: number;
 }
@@ -41,7 +41,6 @@ export default function GlyphEditor({ outline, onChange }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<{ index: number; base: Cmd[]; startX: number; startY: number; scale: number } | null>(null);
 
-  // Resync when a different glyph / fresh outline arrives.
   useEffect(() => {
     setCommands(outline.commands);
   }, [outline]);
@@ -91,7 +90,7 @@ export default function GlyphEditor({ outline, onChange }: Props) {
     const d = drag.current;
     if (!d) return;
     const dx = (e.clientX - d.startX) / d.scale;
-    const dy = -(e.clientY - d.startY) / d.scale; // screen y is inverted vs font y
+    const dy = -(e.clientY - d.startY) / d.scale;
     setCommands(apply(d.index, d.base, dx, dy));
   };
 
@@ -112,15 +111,11 @@ export default function GlyphEditor({ outline, onChange }: Props) {
       onPointerLeave={onPointerUp}
     >
       <g transform={`translate(${-originX} ${topY}) scale(1 -1)`}>
-        {/* guides */}
         <line x1={minX - padX} y1={0} x2={maxX + padX} y2={0} className="ge-guide" />
         <line x1={0} y1={minY - padY} x2={0} y2={maxY + padY} className="ge-guide ge-guide--faint" />
         <line x1={outline.advance} y1={minY - padY} x2={outline.advance} y2={maxY + padY} className="ge-guide ge-guide--faint" />
-        {/* glyph fill */}
         <path d={pathD(commands)} className="ge-fill" />
-        {/* outline stroke for clarity while editing */}
         <path d={pathD(commands)} className="ge-outline" style={{ strokeWidth: r * 0.5 }} />
-        {/* draggable anchors */}
         {anchors.map((a) => (
           <circle
             key={a.index}
