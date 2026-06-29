@@ -9,6 +9,7 @@ import {
 } from "@/lib/specimenContent";
 import type { FontParams } from "@/lib/types";
 import { FONT_BY_ID, DEFAULT_FONT_ID, fontFaceStyle, weightName } from "@/lib/fontCatalog";
+import Slider from "@/components/Slider";
 
 interface Props {
   params: FontParams;
@@ -61,14 +62,14 @@ export default function FontSpecimen({ params, liveStyle, glyphCount, source }: 
             </select>
           </div>
           <div className="gf-preview-size">
-            <label htmlFor="preview-size">Size</label>
-            <input
-              id="preview-size"
-              type="range"
+            <label>Size</label>
+            <Slider
               min={16}
               max={140}
               value={previewSize}
-              onChange={(e) => setPreviewSize(Number(e.target.value))}
+              onChange={(val) => setPreviewSize(Math.round(val))}
+              formatTooltip={(n) => `${Math.round(n)}px`}
+              aria-label="Preview size"
             />
             <span className="gf-preview-size-val">{previewSize}px</span>
           </div>
