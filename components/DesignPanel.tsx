@@ -2,6 +2,7 @@
 
 import type { FontParams } from "@/lib/types";
 import { FONTS, FONT_BY_ID, DEFAULT_FONT_ID } from "@/lib/fontCatalog";
+import Slider from "@/components/Slider";
 
 interface Props {
   params: FontParams;
@@ -70,14 +71,14 @@ export default function DesignPanel({
                 <span>{axis.label}{axis.hint ? ` · ${axis.hint}` : ""}</span>
                 <b>{axis.fmt ? axis.fmt(v) : Math.round(v)}</b>
               </div>
-              <input
-                type="range"
-                className="pp-range"
+              <Slider
                 min={axis.min}
                 max={axis.max}
                 step={axis.step}
                 value={v}
-                onChange={(e) => onAxisChange(axis.tag, parseFloat(e.target.value))}
+                onChange={(val) => onAxisChange(axis.tag, val)}
+                formatTooltip={(n) => (axis.fmt ? axis.fmt(n) : String(Math.round(n)))}
+                aria-label={axis.label}
               />
             </div>
           );
@@ -87,14 +88,14 @@ export default function DesignPanel({
           <span>Tracking · letter spacing</span>
           <b>{params.tracking > 0 ? `+${params.tracking}` : params.tracking}</b>
         </div>
-        <input
-          type="range"
-          className="pp-range"
+        <Slider
           min={-40}
           max={160}
           step={1}
           value={params.tracking}
-          onChange={(e) => onTrackingChange(parseFloat(e.target.value))}
+          onChange={onTrackingChange}
+          formatTooltip={(n) => (n > 0 ? `+${n}` : String(n))}
+          aria-label="Tracking · letter spacing"
         />
 
         <div className="pp-shape-divider">
@@ -109,14 +110,14 @@ export default function DesignPanel({
                 <span>{s.label}</span>
                 <b>{s.fmt(v)}</b>
               </div>
-              <input
-                type="range"
-                className="pp-range"
+              <Slider
                 min={s.min}
                 max={s.max}
                 step={s.step}
                 value={v}
-                onChange={(e) => onShapeChange(s.key, parseFloat(e.target.value))}
+                onChange={(val) => onShapeChange(s.key, val)}
+                formatTooltip={s.fmt}
+                aria-label={s.label}
               />
             </div>
           );
